@@ -115,9 +115,11 @@ npm run dev
 ---
 
 ## 📸 Screenshots
-*(Add screenshots from the `docs/` folder here)*
+
+![Screenshot From 2025-02-26 13-48-07](https://github.com/user-attachments/assets/12a295c4-f1b2-46f8-a2ea-397e8fd31c2d)
 
 ---
+![Screenshot From 2025-02-26 13-48-00](https://github.com/user-attachments/assets/9dd4dd77-627a-4432-8f81-21db3b03280f)
 
 ## 🤝 Contributing
 Feel free to submit issues or pull requests to improve this project.
