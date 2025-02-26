@@ -1,33 +1,34 @@
 from flask import Flask, request, jsonify
 import pickle
 import pandas as pd
+from flask_cors import CORS 
 import numpy as np
 from statsmodels.tsa.arima.model import ARIMAResults
 from tensorflow.keras.models import load_model
 
 app = Flask(__name__)
-
+CORS(app) 
 # ----- Load Saved Models and Artifacts -----
 # Load ARIMA model
-arima_model = ARIMAResults.load("arima_model.pkl")
+arima_model = ARIMAResults.load("../../model/arima_model.pkl")
 
 # Load GARCH model using pickle
-with open("garch_model.pkl", "rb") as f:
+with open("../../model/garch_model.pkl", "rb") as f:
     garch_model = pickle.load(f)
 
 # Load VAR model using pickle (if applicable)
-with open("var_model.pkl", "rb") as f:
+with open("../../model/var_model.pkl", "rb") as f:
     var_model = pickle.load(f)
 
 # Load LSTM model (HDF5 format in this case)
-lstm_model = load_model("lstm_model.h5")
+lstm_model = load_model("../../model/lstm_model.h5")
 
 # Load the scaler used in LSTM preprocessing
-with open("scaler.pkl", "rb") as f:
+with open("../../model/scaler.pkl", "rb") as f:
     scaler = pickle.load(f)
 
 # Load the historical data (ensure the CSV file is in the same directory)
-df = pd.read_csv('brent_data.csv', parse_dates=['Date'], index_col='Date')
+df = pd.read_csv('../../data/raw/BrentOilPrices.csv', parse_dates=['Date'], index_col='Date')
 
 
 # ----- API Endpoints -----
@@ -64,8 +65,16 @@ def predict_lstm():
     req_data = request.get_json()
     input_data = req_data.get('input')  # Expecting a list of values representing a sequence.
     
+    # --- ADJUST THIS BASED ON YOUR MODEL'S EXPECTED INPUT SHAPE ---
+    timesteps = 10  # Replace with the actual sequence length
+    # ---------------------------------------------------------------
+    
+    # Check if the input data has the correct length
+    if len(input_data) != timesteps:
+        return jsonify({'error': f'Input data must have length {timesteps}'}), 400
+    
     # Convert to numpy array and reshape for LSTM: (batch_size, timesteps, features)
-    input_array = np.array(input_data).reshape(1, -1, 1)
+    input_array = np.array(input_data).reshape(1, timesteps, 1)
     
     # Get prediction
     pred = lstm_model.predict(input_array)
