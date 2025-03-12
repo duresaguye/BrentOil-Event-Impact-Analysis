@@ -360,14 +360,14 @@ export default function Dashboard() {
             </CardHeader>
             <CardContent>
               <div className="h-96">
-                {forecastData ? (
+            
                   <Line
                     data={{
-                      labels: forecastData.dates,
+                      labels: forecastData?.dates || [],
                       datasets: [
                         {
                           label: 'Forecasted Price',
-                          data: forecastData.values,
+                          data: forecastData?.values || [],
                           borderColor: 'hsl(142.1 76.2% 36.3%)',
                           backgroundColor: 'hsl(142.1 76.2% 36.3% / 0.1)',
                           fill: true,
@@ -377,16 +377,7 @@ export default function Dashboard() {
                     }}
                     options={chartOptions}
                   />
-                ) : (
-                  <div className="flex items-center justify-center h-full">
-                    <div className="text-center space-y-2">
-                      <div className="text-muted-foreground">No forecast data available</div>
-                      <div className="text-sm text-muted-foreground">
-                        Run a forecast using the configuration panel
-                      </div>
-                    </div>
-                  </div>
-                )}
+                
               </div>
             </CardContent>
           </Card>
