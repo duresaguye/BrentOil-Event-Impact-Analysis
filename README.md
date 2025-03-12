@@ -1,107 +1,131 @@
- ####title: Building a Brent Oil Price Analysis 
 
- ####Introduction
- In this post, we'll walk through the process of building a web-based dashboard for analyzing Brent oil prices. We'll cover the key technologies used, the challenges encountered, and the solutions implemented. This project combines a React frontend, a Flask API backend, and machine learning models for forecasting.
+# 📈 Brent Oil Price Event Impact Analysis
 
- ####Technologies Used
- *   **Frontend:** React, Next.js, Chart.js, Tailwind CSS, Radix UI
- *   **Backend:** Flask, Flask-CORS
- *   **Machine Learning:** ARIMA, LSTM, GARCH (Statsmodels, TensorFlow/Keras)
+## 🛠 Introduction
+This project analyzes the impact of various events on Brent crude oil prices. It includes data collection, machine learning modeling, and a web-based dashboard for visualization. The system integrates:
 
- ####Project Setup
- 1.  **Backend (Flask API):**
- *   Set up a Flask API to serve historical data, model predictions, and evaluation metrics.
- *   Load pre-trained machine learning models (ARIMA, LSTM, GARCH) using `pickle` and `tensorflow.keras.models`.
- *   Implement API endpoints for:
- *   `/api/historical`: Returns historical Brent oil prices.
- *   `/api/predict/arima`: Returns ARIMA forecast.
- *   `/api/predict/lstm`: Returns LSTM forecast.
- *   `/api/metrics`: Returns model evaluation metrics (RMSE, MAE, etc.).
- *   Enable CORS using `flask-cors` to allow cross-origin requests from the React frontend.
+- **Data preprocessing and analysis**
+- **Machine learning models for forecasting**
+- **An interactive web dashboard to visualize trends**
 
- 2.  **Frontend (React):**
- *   Create a React application using Next.js.
- *   Use `axios` to make HTTP requests to the Flask API.
- *   Implement components for:
- *   `DashboardHeader`: Displays the dashboard title and live data.
- *   `HistoricalChart`: Visualizes historical price data using `react-chartjs-2`.
- *   `ForecastInterface`: Allows users to configure forecast parameters (steps, model selection).
- *   `ModelMetrics`: Displays model performance metrics.
+## 🚀 Technologies Used
 
- ####Challenges and Solutions
- 1.  **CORS Error (`AxiosError: Network Error`):**
- *   **Problem:** The React app running on `localhost:3000` couldn't connect to the Flask API on `localhost:5000` due to Cross-Origin Resource Sharing (CORS) restrictions.
- *   **Solution:** Enabled CORS in the Flask API using the `flask-cors` extension:
- ```python
- from flask import Flask
- from flask_cors import CORS
- 
+### Backend:
+- **Flask** (API development)
+- **Flask-CORS** (Cross-Origin Resource Sharing)
+- **Pandas, NumPy** (Data processing)
+- **Pickle** (Model serialization)
 
- app = Flask(__name__)
- CORS(app)  # Enable CORS for all routes
- ```
+### Machine Learning:
+- **ARIMA** (Time-series forecasting)
+- **LSTM** (Deep learning model using TensorFlow/Keras)
+- **GARCH** (Volatility modeling using Statsmodels)
 
- 2.  **Hydration Error (`Text content does not match server-rendered HTML`):**
- *   **Problem:** The initial HTML rendered by the server didn't match the HTML produced by React in the browser, causing a hydration error. This was due to dynamic data (e.g., `new Date().toLocaleString()`) being rendered on the server.
- *   **Solution:** Deferred the execution of client-side-specific logic until after hydration using the `useEffect` hook:
- ```tsx
- const DashboardHeader = () => {
-  const [currentTime, setCurrentTime] = useState<string>('');
- 
+### Frontend:
+- **React + Next.js** (Web dashboard)
+- **Chart.js** (Data visualization)
+- **Tailwind CSS** (UI styling)
+- **Radix UI** (Component library)
 
-  useEffect(() => {
-  setCurrentTime(new Date().toLocaleString());
-  }, []);
- 
+---
 
-  return (
-  <header>
-  {/* ... */}
-  <span>{currentTime}</span>
-  </header>
-  );
- };
- ```
+## 📁 Project Structure
 
- 3.  **LSTM Input Shape Mismatch (`ValueError` in Flask API):**
- *   **Problem:** The LSTM model in the Flask API expected a specific input shape, but the input data from the React app didn't match.
- *   **Solution:**
- *   Determined the LSTM model's expected input shape (timesteps, features).
- *   Adjusted the input data and reshape operation in the Flask API to match the expected shape:
- ```python
- @app.route('/api/predict/lstm', methods=['POST'])
- def predict_lstm():
-  # ...
+```
+BrentOil-Event-Impact-Analysis/
+│── dashboard/        # React-based frontend and flask-based backend
+│── data/             # Raw and processed datasets
+│── docs/             # Documentation and reports
+│── model/            # Pre-trained ML models
+│── notebooks/        # Jupyter notebooks for analysis
+│── scripts/          # Data processing and API scripts
+│── requirements.txt  # Dependencies
+│── README.md         # Project documentation
+```
+
+---
+
+## ⚙️ Project Setup
+
+### 1️⃣ Backend (Flask API)
+The backend is responsible for serving data and forecasts.
+
+#### Installation:
+```bash
+pip install -r requirements.txt
+```
+
+#### Running the API:
+```bash
+python scripts/api.py
+```
+
+#### API Endpoints:
+- `/api/historical` → Fetch historical Brent oil prices
+- `/api/predict/arima` → Get ARIMA model forecast
+- `/api/predict/lstm` → Get LSTM model forecast
+- `/api/metrics` → Get model performance metrics (RMSE, MAE)
+
+---
+
+### 2️⃣ Frontend (React Dashboard)
+The React dashboard fetches and visualizes the API data.
+
+#### Installation:
+```bash
+cd dashboard
+npm install
+```
+
+#### Running the Dashboard:
+```bash
+npm run dev
+```
+
+---
+
+## ⚡ Challenges and Solutions
+
+### ❌ CORS Errors
+- **Issue**: The frontend couldn't access the backend due to CORS restrictions.
+- **Solution**: Enabled CORS in Flask using `flask-cors`:
+  ```python
+  from flask_cors import CORS
+  CORS(app)
+  ```
+
+### ❌ LSTM Input Shape Mismatch
+- **Issue**: The LSTM model expected a different input shape.
+- **Solution**: Adjusted reshaping in the Flask API:
+  ```python
   input_array = np.array(input_data).reshape(1, timesteps, 1)
-  # ...
- ```
+  ```
 
- 4.  **Displaying Forecast Data:**
- *   **Problem:** The forecast data wasn't being displayed correctly in the React app.
- *   **Solution:**
- *   Ensured that the API was returning the forecast data in the expected format (dates and values arrays).
- *   Transformed the data in the React app to match the chart's expected format:
- ```javascript
- const handleForecast = async (steps: number, model: string) => {
-  // ...
-  const forecastValues = response.data.forecast;
+### ❌ Forecast Data Not Displaying
+- **Issue**: Data format mismatch between API and frontend.
+- **Solution**: Transformed the forecast response data before visualization:
+  ```javascript
   const forecastDates = Array.from({ length: steps }, (_, i) => {
-  const nextDate = new Date();
-  nextDate.setDate(nextDate.getDate() + i + 1);
-  return nextDate.toLocaleDateString();
+    let date = new Date();
+    date.setDate(date.getDate() + i + 1);
+    return date.toLocaleDateString();
   });
-  setForecastData({ dates: forecastDates, values: forecastValues });
-  // ...
- };
- ```
- images
- 
+  ```
 
- 5.  **JSX Parsing Error (`Unexpected token Card. Expected jsx identifier`):**
- *   **Problem:** The JSX syntax wasn't being correctly parsed in the React component.
- *   **Solution:**
- *   Verified that Babel was correctly configured.
- *   Checked for syntax errors in the JSX code.
- *   Ensured that all components were being imported correctly.
+---
 
- 
+## 📸 Screenshots
+
+![Screenshot From 2025-02-26 13-48-07](https://github.com/user-attachments/assets/12a295c4-f1b2-46f8-a2ea-397e8fd31c2d)
+
+---
+![Screenshot From 2025-02-26 13-48-00](https://github.com/user-attachments/assets/9dd4dd77-627a-4432-8f81-21db3b03280f)
+
+## 🤝 Contributing
+Feel free to submit issues or pull requests to improve this project.
+
+---
+
+## 📜 License
+This project is licensed under the **MIT License**.
+
